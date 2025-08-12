@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Property {
+  id        String   @id @default(cuid())
+  name      String
+  address   String
+  city      String
+  state     String
+  zip       String
+  assessorRecords AssessorRecord[]
+  permits   Permit[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AssessorRecord {
+  id          String   @id @default(cuid())
+  propertyId  String
+  parcel      String?
+  owner       String?
+  rawJson     Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  property    Property @relation(fields: [propertyId], references: [id])
+}
+
+model Permit {
+  id          String   @id @default(cuid())
+  propertyId  String
+  permitNo    String?
+  type        String?
+  status      String?
+  issuedAt    DateTime?
+  rawJson     Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  property    Property @relation(fields: [propertyId], references: [id])
+}
+
+model Policy {
+  id          String   @id @default(cuid())
+  propertyId  String?
+  carrier     String?
+  number      String?
+  effective   DateTime?
+  expiration  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  property    Property? @relation(fields: [propertyId], references: [id])
+  renewals    Renewal[]
+}
+
+model Renewal {
+  id          String   @id @default(cuid())
+  policyId    String
+  dueDate     DateTime
+  status      String   @default("pending")
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  policy      Policy   @relation(fields: [policyId], references: [id])
+  tasks       Task[]
+}
+
+model Task {
+  id          String   @id @default(cuid())
+  renewalId   String
+  title       String
+  status      String   @default("open")
+  priority    String?  // e.g., green/yellow/purple logic later
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  renewal     Renewal  @relation(fields: [renewalId], references: [id])
+}

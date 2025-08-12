@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: portal-u1stgroup
+    env: node
+    plan: starter
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: APP_BASE_URL
+        value: https://portal.u1stgroup.com
+      - key: NEXTAUTH_URL
+        value: https://portal.u1stgroup.com
+      - key: NEXTAUTH_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: portal-db
+          property: connectionString
+databases:
+  - name: portal-db
+    plan: starter
